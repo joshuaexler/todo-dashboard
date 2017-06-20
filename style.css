@@ -1,0 +1,9 @@
+
+
+body{
+	text-align: center;
+}
+
+a:visited {
+    color: 'green';
+}

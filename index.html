@@ -1,0 +1,2022 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<title>Todo Daily Dashboard - v. 1.1 - Joshua Exler</title>
+	<!--<link rel="stylesheet" type="text/css" media="screen" href="todoiststyle.css" />-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript" src="todoist.js"></script>
+	<script src='jquery.animate-colors.js'></script>
+	<script src="ChartNew.js"></script>
+	<!--<script src='http://cdn.datatables.net/1.10.1/js/jquery.dataTables.js'></script>-->
+
+<style type="text/css">
+    .tooltip {
+    position: absolute;
+    z-index: 999;
+    left: -9999px;
+    word-wrap: break-word;
+    max-width: 350px;
+    padding: 0 0.2em;
+    color: #333;
+    background: #333;
+    border: 1px solid #aaa;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.2), 0 0px 10px rgba(0,0,0,0.05) inset;
+    }
+.picto{
+	opacity:.7;
+	border-radius: 30px;
+	padding:2px;
+}
+
+
+    </style>
+
+
+	
+	
+
+	<script>
+	$(document).bind('mousemove', function(e){
+    		$('#pictogramTooltip').css({
+       			left:  e.pageX + 20,
+       			top:   e.pageY
+    			});
+			});
+
+	$(document).ready(function() {
+		startNewCountDown();
+		docReadyFunction();
+		tasksArray = new Array();
+		globalCurHeaderColor = "#777777";
+	});
+	function docReadyFunction(){
+
+
+	todaysTally = 0;
+
+		
+	instantlyHidePictogramTooltip();
+	totalDailyRem = 0; //static
+	var test = new Todoist();
+	projectsArray = new Array();
+	colorsArray = new Array();
+	
+	test.token = getParameterByName('token');
+	if(!test.token||(test.token).length==0){
+		$( "#taskLogOutput" ).remove();
+		canvasOne.style.visibility = 'hidden';
+		canvasTwo.style.visibility = 'hidden';
+		canvasThree.style.visibility = 'hidden';
+		canvasFour.style.visibility = 'hidden';
+		syncCountdown.style.visibility = 'hidden';
+		canvasOne.style.height='0px';
+		canvasTwo.style.height='0px';
+		canvasThree.style.height='0px';
+		canvasFour.style.height='0px';
+		syncCountdown.style.height='0px';
+		credits2.style.visibility='hidden';
+		credits2.style.height='0px';
+		taskGenButtons.style.visibility='hidden';
+		taskGenButtons.style.height='0px';
+	}
+	else{introText.style.visibility ='hidden'; $( "#screenshot" ).remove(); $( "#screenshot2" ).remove(); credits1.style.height='0px'; credits1.style.visibility='hidden'; document.getElementById('headerArea').innerHTML = document.getElementById('headerArea').innerHTML.replace('<br><i>Generate a bookmark below to get started</i>',''); genBookmark.style.visibility = 'hidden'; genBookmark.style.height='0px'; outerP.style.visibility = 'hidden'; outerP.style.height='0px'; $( "#rowContainingIntroContent" ).remove(); $( "#filler1" ).remove(); $( "#filler2" ).remove(); $( "#filler3" ).remove(); $( "#filler4" ).remove(); $( "#filler5" ).remove();
+		}
+	// To get a token go to the Account tab in the Todoist settings
+	test.sync.oncomplete = function( dataIn ){ console.log( data.items);
+
+	for(var i=0;i<250;i++){ //for up to 250 projects (limit for todoist subscribers)
+		try{var curAccessInt = Object.keys(dataIn.projects)[i];
+			projectsArray[i]=[dataIn.projects[curAccessInt].name,dataIn.projects[curAccessInt].colourHex,dataIn.projects[curAccessInt].id,0]; // 0 : project name, 1 : project color, 2 : project id, 3 : tally of tasks in project
+		}
+		catch(err){console.log('Passing over undefined project in projects array.');}
+	}
+
+
+
+		themeLightGreen = '#228b22';
+		themeDarkGreen = 'green';
+		themeLightRed = '#BC113D';
+		themeDarkRed = '#BC113D'; 
+		themeDarkRedAlt = 'darkred'; 
+		themeLightYellow = '#ffea6e';
+		themeYellow = "#ffea6e";
+		themeDarkYellow = '#dcbc4e';
+		themeOrange = '#ffa64d';
+		omegaColorArray = new Array(); // the absolute final (omega)array of colors
+		omegaTallyArray = new Array(); // the absolute final (omega)array of tallies for colors
+		omegaBlanksArray = new Array(); // for use as x axis labels on color graph
+		omegaProjectsArray = new Array();
+		omegaProjectsTallyArray = new Array();
+		omegaProjectsColorArray = new Array();
+
+
+	var prioritiesArray = [0,0,0,0]; //lowest, yellow, orange red
+
+	for(var k=0;k<2000;k++){ //works for up to 2,000 tasks (higher values than 2,000 are completely feasible, but take longer to sync)
+		utc = new Date().toString().replace(/-/g,'/').split(' ').join('/'); //alert(utc);
+		
+		var thisYear = (utc.split('/'))[3];
+		var thisMonth = monthToNumber((utc.split('/'))[1]);
+		var thisDay = (utc.split('/'))[2];
+
+		try{var curAccessInt = Object.keys(dataIn.items)[k]; 
+			utc4 = new Date().toJSON().slice(0,10).replace(/-/g,'/'); // greenwich date
+			var timeZoneOffsetInHours = utc4/60;
+			
+
+			if( dataIn.items[curAccessInt].checkable &&   dataIn.items[curAccessInt].dueDateUtc.getDate()==thisDay  && (dataIn.items[curAccessInt].dueDateUtc.getMonth() == thisMonth -1 ) && (dataIn.items[curAccessInt].dueDateUtc.getFullYear() == (thisYear) )){
+					 tally(dataIn.items[curAccessInt].projectId); 
+					
+					}
+			else if(!data.items[curAccessInt].checkable){
+				// not-checkable items are not included in the tallies (i.e., total daily tasks tally, priorities tally, etc.)
+				 weatherPrintout(dataIn.items[curAccessInt].content);
+			}
+
+			if( dataIn.items[curAccessInt].checkable &&   dataIn.items[curAccessInt].dueDateUtc.getDate()==thisDay  && (dataIn.items[curAccessInt].dueDateUtc.getMonth() == thisMonth -1) && (dataIn.items[curAccessInt].dueDateUtc.getFullYear() == (thisYear) )){
+				console.log('Priority tally will include : ' + dataIn.items[curAccessInt].content);
+				todaysTally++;
+				if(dataIn.items[curAccessInt].priority==1){
+					prioritiesArray[0]++; //low
+					//alert(dataIn.items[curAccessInt].content);
+					var curTaskName = (dataIn.items[curAccessInt].content).replace('"','&quot;').replace("'",'&rsquo;').replace("'",'&rsquo;').replace('(','&#40;').replace(')','&#41;').replace(':','&#58;').replace('@','&#64;');
+					tasksArray.push(getProjectColorFromId(dataIn.items[curAccessInt].projectId),themeLightGreen,dataIn.items[curAccessInt].content); // 0: project color , 1: priority color, 2: task name (i.e., task content)
+					document.getElementById('greenTasks').innerHTML += '<img class="picto" id="picto'+todaysTally+'"  priority="green" onmouseover="showPictogramTooltip('+"'"+curTaskName+"'"+','+"'"+lookupProjectColor((dataIn.items[curAccessInt].projectId))+"'"+')" onmouseout="hidePictogramTooltip()" class="pictogram" src="' + getPictogramSrc(dataIn.items[curAccessInt].content) + '" height="48px" style="display:inline-block; box-shadow: 4px -4px 2px #228b22;  border:' + '2px solid #111111; background-color: ' +lookupProjectColor(dataIn.items[curAccessInt].projectId)+ ';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+					//document.getElementById('taskLogOutput').innerHTML += '<img src="'+
+						//getPictogramSrc(dataIn.items[curAccessInt].content)+
+						//'" height="50px" backgroundImage="'+
+						//'"url('+
+						//"'"+
+						//'overlays/b3cca7.png'+
+						//"'"+
+						//")>";
+					//+dataIn.items[curAccessInt].projectId+" : "+themeLightGreen+" : "+dataIn.items[curAccessInt].content+"<br>";
+
+				}
+				else if(dataIn.items[curAccessInt].priority==2){ //#ffea6e medium
+
+					prioritiesArray[1]++; //medium
+					var curTaskName = (dataIn.items[curAccessInt].content).replace('"','&quot;').replace("'",'&rsquo;').replace("'",'&rsquo;').replace('(','&#40;').replace(')','&#41;').replace(':','&#58;').replace('@','&#64;');
+					tasksArray.push(getProjectColorFromId(dataIn.items[curAccessInt].projectId),themeLightYellow,dataIn.items[curAccessInt].content); // 0: project color , 1: priority color, 2: task name (i.e., task content)
+					
+					document.getElementById('yellowTasks').innerHTML += '<img class="picto" id="picto'+todaysTally+'"  priority="yellow" onmouseover="showPictogramTooltip('+"'"+curTaskName+"'"+','+"'"+lookupProjectColor((dataIn.items[curAccessInt].projectId))+"'"+')" onmouseout="hidePictogramTooltip()" class="pictogram" src="' + getPictogramSrc(dataIn.items[curAccessInt].content) + '" height="48px" style="display:inline-block; box-shadow: 4px -4px 2px #ffea6e;  border:' + '2px solid #111111; background-color: ' +lookupProjectColor(dataIn.items[curAccessInt].projectId)+ ';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+				else if(dataIn.items[curAccessInt].priority==3){ //#ffa64d high
+					prioritiesArray[2]++; //high
+					var curTaskName = (dataIn.items[curAccessInt].content).replace('"','&quot;').replace("'",'&rsquo;').replace("'",'&rsquo;').replace('(','&#40;').replace(')','&#41;').replace(':','&#58;').replace('@','&#64;');
+					tasksArray.push(getProjectColorFromId(dataIn.items[curAccessInt].projectId),'#ffa64d',dataIn.items[curAccessInt].content); // 0: project color , 1: priority color, 2: task name (i.e., task content)
+					document.getElementById('orangeTasks').innerHTML += '<img class="picto" id="picto'+todaysTally+'" priority="orange" onmouseover="showPictogramTooltip('+"'"+curTaskName+"'"+','+"'"+lookupProjectColor((dataIn.items[curAccessInt].projectId))+"'"+')" onmouseout="hidePictogramTooltip()" class="pictogram" src="' + getPictogramSrc(dataIn.items[curAccessInt].content) + '" height="48px" style="display:inline-block; box-shadow: 4px -4px 2px #ff7f00; border:' + '2px solid #111111; background-color: ' +lookupProjectColor(dataIn.items[curAccessInt].projectId)+ ';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				}
+				else if(dataIn.items[curAccessInt].priority==4){ //#E77471 highest
+				prioritiesArray[3]++; //highest
+					var curTaskName = (dataIn.items[curAccessInt].content).replace('"','&quot;').replace("'",'&rsquo;').replace("'",'&rsquo;').replace('(','&#40;').replace(')','&#41;').replace(':','&#58;').replace('@','&#64;');
+				tasksArray.push(getProjectColorFromId(dataIn.items[curAccessInt].projectId),'#BC113D',dataIn.items[curAccessInt].content); // 0: project color , 1: priority color, 2: task name (i.e., task content)
+				document.getElementById('redTasks').innerHTML += '<img class="picto" id="picto'+todaysTally+'" priority="red" onmouseover="showPictogramTooltip('+"'"+curTaskName+"'"+','+"'"+lookupProjectColor((dataIn.items[curAccessInt].projectId))+"'"+')" onmouseout="hidePictogramTooltip()" class="pictogram" src="' + getPictogramSrc(dataIn.items[curAccessInt].content) + '" height="48x" style="display:inline-block; box-shadow: 4px -4px 2px #BC113D; border:' + '2px solid #111111; background-color: ' +lookupProjectColor(dataIn.items[curAccessInt].projectId)+ ';">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+			}
+
+	}
+
+else{
+	
+}
+}
+	catch(err){console.log('Generating priorities tally: passing over a blank task.');}
+}
+	
+
+	for(var p=0;p<projectsArray.length;p++){
+		totalDailyRem += projectsArray[p][3];
+		colorsArray[p]=[projectsArray[p][1],projectsArray[p][3],p]; // 0: color hex, 1: tally of tasks in project, 2: value of index itself
+	}
+
+completedToday = dataIn.user.completedToday;
+
+$(".picto").hover(function(){
+		$(this).animate({opacity:1},200);
+        
+
+    },
+        function(){
+		$(this).animate({opacity:.7},200);
+
+        
+
+    }
+
+        );	
+/*--------------------------------------------------------------------------------------------------------------------------------*/
+
+barChartDataOne = { //COMPLETED VS. REMAINING
+			labels : ["Completed Today","Remaining Today"],
+			datasets : [
+				{
+					label: "Total Completed Today", //position 0 "Total Completed Today"
+					fillColor : ['#666666','#cccccc'],
+					strokeColor : ['#666666','#cccccc'],
+					pointColor : ['#000000','#333333'],
+					pointStrokeColor : "#fff",
+					data : [completedToday,totalDailyRem]
+				},	
+			]
+		};
+
+		barChartDataOne.datasets[0].data = [completedToday,totalDailyRem];
+
+		var ctxOne = document.getElementById("canvasOne").getContext("2d");
+		window.myBarOne = new Chart(ctxOne).Bar(barChartDataOne , {
+			graphTitle: 'Total Completed Today vs. Total Remaining Today',
+			graphTitleFontSize: 14,
+			graphTitleFontColor: '#dddddd',
+			scaleFontColor: '#dddddd',
+			inGraphDataFontColor: '#dddddd',
+			tooltipFontSize: 14,
+			annotateDisplay: true,
+			annotateLabel: ['<%=v3%> Tasks'],
+			inGraphDataShow: true,
+			inGraphDataFontStyle: 'bold',
+			inGraphDataFontSize: '16',
+			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
+			pointDot: false,
+			showTooltips: true,
+			scaleShowGridLines : true,
+			populateSparseData: true,
+			maxBarWidth: 80,
+         overlayBars: false,
+         datasetFill: false,
+         yAxisMinimumInterval: 1,
+          scaleOverlay: true,
+          graphMin: 0,
+          canvasBackgroundColor: '#333333',
+
+        
+		});
+	   
+
+
+
+	//pump up the task tallies for *all* projects (overhyped projects will be dropped later regardless)
+	for (var h=0;h<colorsArray.length;h++){
+		for (var g=0;g<colorsArray.length;g++){
+			if(colorsArray[g][0]===colorsArray[h][0] && g!=h) colorsArray[h][1] += colorsArray[g][1];
+		}
+	}
+
+	indecesForDeletion = new Array();
+
+	for(var s=0;s<colorsArray.length;s++){ // generate del indeces array
+		
+			if(checkColorDupes(colorsArray[s][0],s)>1){indecesForDeletion.push(s);} // does the hex appear later in the list? if so, then push the current index, for future deletion.
+
+	}
+
+	//only uncomment if debugging is needed //LOG DELETION INDECES
+	//for(var t=0;t<indecesForDeletion.length;t++){
+		
+		//console.log(indecesForDeletion[t] + ", ");
+	//}
+
+	finalColorsArray = new Array(); // name is a misnomer, since this array will be sorted later by colors' hues
+	//finalColorsArray has three elements (dimensions): 
+		//index 0: color hex
+		//index 1: tally of tasks in project
+		//index 2: value of index itself
+		
+
+		
+	
+
+
+
+	
+
+	for(var itr=0; itr<colorsArray.length;itr++){ //push to final colors array if and only if index is not included in the array of deletion indeces
+		if(!contains(indecesForDeletion,itr)) finalColorsArray.push(colorsArray[itr]);
+	}
+	
+	sortedColorsArray = new Array(); //1 dimensional
+	for(var w=0;w<finalColorsArray.length;w++){
+		sortedColorsArray.push((finalColorsArray[w][0]).toString());
+	}
+	
+
+
+	sortedTalliesByColorArray = new Array(); //1 dimensional
+
+	for(var d=0;d<sortedColorsArray.length;d++){
+		sortedTalliesByColorArray.push(lookupColorTally(sortedColorsArray[d]));
+	}
+
+	sortedProjectsArray = new Array();
+
+	for(var zz=0;zz<projectsArray.length;zz++){
+		sortedProjectsArray.push((projectsArray[zz][0]).toString());
+	}
+
+	sortedTalliesByProjectArray = new Array();
+
+
+	for(var yy=0;yy<projectsArray.length;yy++){
+		sortedTalliesByProjectArray.push(lookupProjectTally(projectsArray[yy]));
+	}
+
+	
+	//todoist has 22 project colors. this for loop iterates over 1 to 22, *inclusive* (1,2,3,...,22)
+	for(var u=1;u<=22;u++){
+		for(var c=0;c<sortedColorsArray.length;c++){
+		if(lookupRainbowRanking(sortedColorsArray[c])==u && sortedTalliesByColorArray[c]>0){
+			omegaColorArray.push(sortedColorsArray[c]);
+			omegaTallyArray.push(sortedTalliesByColorArray[c]);
+			omegaBlanksArray.push(' ');
+		}
+	}
+	}
+
+	for(var l=1;l<=22;l++){
+
+		for(var g=0;g<projectsArray.length;g++){
+		if(lookupRainbowRanking(projectsArray[g][1])==l && projectsArray[g][3]>0){
+			omegaProjectsArray.push(projectsArray[g][0]);
+			omegaProjectsTallyArray.push(sortedTalliesByProjectArray[g]);
+			omegaProjectsColorArray.push(projectsArray[g][1]);
+		}
+	}
+	}
+
+
+	
+
+	barChartDataTwo = { //REMAINING BY PRIORITY
+			
+			labels: ["Low (p4)","Medium (p3)","High (p2)","Highest (p1)"],
+    datasets: [
+        {
+            label: "Total Remaining by Priority",
+            fillColor:  [themeLightGreen, themeLightYellow, "#ff7f00", '#BC113D'],
+            strokeColor: '#333333',
+            highlightFill: "rgba(220,220,220,0.75)",
+            highlightStroke: "rgba(220,220,220,1)",
+            
+        }
+    ]
+				
+				
+			
+		};
+		barChartDataTwo.datasets[0].data = [prioritiesArray[0],prioritiesArray[1],prioritiesArray[2],prioritiesArray[3]];
+
+		var ctxTwo = document.getElementById("canvasTwo").getContext("2d");
+		window.myBarTwo = new Chart(ctxTwo).Bar(barChartDataTwo , {
+			graphTitle: 'Remaining Today by Priority',
+			graphTitleFontSize: 14,
+			graphTitleFontColor: '#dddddd',
+			scaleFontColor: '#dddddd',
+			inGraphDataFontColor: '#dddddd',
+			tooltipFontSize: 14,
+			annotateDisplay: true,
+			annotateLabel: ['<%=v3%> Tasks Remaining'],
+			inGraphDataShow: true,
+			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
+			pointDot: false,
+			showTooltips: true,
+			scaleShowGridLines : true,
+			populateSparseData: true,
+         overlayBars: false,
+         datasetFill: false,
+         maxBarWidth: 80,
+         yAxisMinimumInterval: 1,
+          scaleOverlay: true,
+          graphMin: 0,
+         canvasBackgroundColor: '#333333',
+
+         
+		});
+
+		/*--------------------------------------------------------------------------------------------------------------------------------*/
+
+		barChartDataThree = { //REMAINING BY COLOR
+			
+			labels: omegaBlanksArray,
+    		datasets: [
+        {
+            label: "Total Remaining by Color",
+            fillColor:  omegaColorArray,
+            strokeColor: '#333333',
+            highlightFill: "rgba(220,220,220,0.75)",
+            highlightStroke: "rgba(220,220,220,1)",
+           
+        }
+    ]
+				
+				
+			
+		};
+
+		barChartDataThree.datasets[0].data = omegaTallyArray;
+
+		var ctxThree = document.getElementById("canvasThree").getContext("2d");
+		window.myBarThree = new Chart(ctxThree).Bar(barChartDataThree , {
+			graphTitle: 'Remaining Today by Color',
+			graphSubTitle: 'Colors with 0 Tasks Remaining Today are Not Shown',
+			graphSubTitleFontStyle: 'italic',
+			graphTitleFontSize: 14,
+			graphSubTitleFontSize: 12,
+			graphTitleFontColor: '#dddddd',
+			graphSubTitleFontColor: '#dddddd',
+			scaleFontColor: '#dddddd',
+			inGraphDataFontColor: '#dddddd',
+			tooltipFontSize: 14,
+			annotateDisplay: true,
+			annotateLabel: ['<%=v3%> Tasks Remaining'],
+			inGraphDataShow: true,
+			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
+			pointDot: false,
+			showTooltips: true,
+			scaleShowGridLines : true,
+			populateSparseData: true,
+         overlayBars: false,
+         datasetFill: false,
+         maxBarWidth: 80,
+         yAxisMinimumInterval: 1,
+          scaleOverlay: true,
+          graphMin: 0,
+            canvasBackgroundColor: '#333333',
+
+         
+		});
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------------------*/
+		barChartDataFour = { 
+			
+			labels: omegaProjectsArray,
+   			datasets: [
+        {
+            label: "Total Remaining by Project",
+            fillColor:  omegaProjectsColorArray,
+            strokeColor: '#333333',
+            highlightFill: "rgba(220,220,220,0.75)",
+            highlightStroke: "rgba(220,220,220,1)",
+           
+        }
+    ]
+				
+				
+			
+		};
+		barChartDataFour.datasets[0].data = omegaProjectsTallyArray;
+
+		var ctxFour = document.getElementById("canvasFour").getContext("2d");
+		window.myBarFour = new Chart(ctxFour).Bar(barChartDataFour , {
+			graphTitle: 'Remaining Today by Project',
+			graphSubTitle: 'Projects with 0 Tasks Remaining Today are Not Shown',
+			graphSubTitleFontStyle: 'italic',
+			graphTitleFontSize: 14,
+			graphSubTitleFontSize: 12,
+			graphTitleFontColor: '#dddddd',
+			graphSubTitleFontColor: '#dddddd',
+			scaleFontColor: '#dddddd',
+			inGraphDataFontColor: '#dddddd',
+			tooltipFontSize: 14,
+			annotateDisplay: true,
+			annotateLabel: ['<%=v3%> Tasks Remaining'],
+			inGraphDataShow: true,
+			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
+			pointDot: false,
+			showTooltips: true,
+			scaleShowGridLines : true,
+			populateSparseData: true,
+	         overlayBars: false,
+	         datasetFill: false,
+	         maxBarWidth: 80,
+	         yAxisMinimumInterval: 1,
+	         xAxisMiddle: true,
+	         scaleOverlay: true,
+	         graphMin: 0,
+	         scaleFontSize: 10,
+	         rotateLabels: 90,
+	         canvasBackgroundColor: '#333333',
+
+         
+		});
+
+		//changes border color for the header
+		var newHeaderColor = getRandomColor();
+		//alert(newHeaderColor);
+		$('#headerArea').animate({borderColor:newHeaderColor},1000);
+	   
+
+	 };
+
+	// Function to be called once the API data has been received and processed
+	test.sync();
+
+
+
+
+	//setInterval(async function
+		setInterval(function(){
+				//var newHeaderColor = getRandomColor();
+				//$('#headerArea').animate({borderColor:newHeaderColor},1000);
+				document.getElementById('taskLogOutput').innerHTML = "<span style='line-height:100%; font: 16px arial, sans-serif; color: #dddddd'><b>Tasks Remaining Today</b><br><br><br></span><span id='redTasks'></span><span id='orangeTasks'></span><span id='yellowTasks'></span><span id='greenTasks'></span>";
+				stringArray = ['0th element','canvasOne','canvasTwo','canvasThree','canvasFour'];
+				for(stringItr=1;stringItr<5;stringItr++){
+					canvasTarget = document.getElementById(stringArray[stringItr]);
+					ctx = canvasTarget.getContext('2d');
+					ctx.clearRect(0, 0, canvasTarget.width, canvasTarget.height);
+					ctx.font = "20px Arial";
+					ctx.fillText("Syncing...",canvasTarget.width/1.9,canvasTarget.height/2);
+					
+					//#STRAT HEAR: You might have to put the syncing text back. But maybe you could instead of a blank fillRect with a ctx-->png of the graph content, for that second or two?
+				}
+				totalDailyRem = 0;
+				todaysTally = 0;
+				test.syncFresh();
+				//await sleep(2000);
+				secondsInt = 60;
+				
+				//document.getElementById('taskLogOutput').innerHTML = "Syncing ... ";
+				
+		},60000);
+		
+		
+	
+
+
+	}
+	</script>
+
+	<script>
+//function sleep(ms) {
+  //return new Promise(resolve => setTimeout(resolve, ms));
+//}
+
+	function clearAllCanvas(){
+		for(stringItr=1;stringItr<5;stringItr++){
+					canvasTarget = document.getElementById(stringArray[stringItr]);
+					ctx = canvasTarget.getContext('2d');
+					ctx.clearRect(0, 0, canvasTarget.width, canvasTarget.height);
+				}
+	}
+
+	function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+	function startNewCountDown(){
+		secondsInt = 60;
+		document.getElementById('syncCountdown').innerHTML = "Time Until Next Sync: 60 Seconds";
+		setInterval(function(){
+		document.getElementById('syncCountdown').innerHTML = countdownStringIncr(document.getElementById('syncCountdown').innerHTML);
+		},1000);
+	}
+
+	function countdownStringIncr(inputString){
+		var secondsString = (inputString.split(' '))[4];
+		if(secondsString==='1') secondsInt = 60;
+		else{secondsInt = parseInt(secondsString,10)-1;}
+		return ("Time Until Next Sync: ").concat(secondsInt.toString()).concat(" Seconds");
+	}
+
+	function contains(inputArray,inputElt){
+		for(var x=0;x<inputArray.length;x++){
+			if(inputArray[x]==inputElt) return true;
+		}
+		return false;
+	}
+
+	function checkColorDupes(inputHex,index){
+		var hexTall=0;
+		for(var z=0;z<=index;z++){
+			if(colorsArray[z][0]===inputHex) hexTall++;
+		}
+		return hexTall;
+	}
+
+	function getFontColor(inputInt){
+		for(var n=0;n<projectsArray.length;n++){
+			if(projectsArray[n][2]==inputInt) return projectsArray[n][1];
+		}
+	}
+
+	function tally(inputProject){
+		for(var m=0;m<projectsArray.length;m++){
+			if(projectsArray[m][2]==inputProject) projectsArray[m][3]++;// if the input project int matches the project int of the project being searched, then increment the corresponding project's tally.
+		}
+	}
+
+	function weatherPrintout(inputTaskString){
+		if( (inputTaskString.split('weather')).length>1 && (inputTaskString.split('high')).length>1 && (inputTaskString.split('low')).length>1){
+			
+			//document.getElementById('weatherReport').innerHTML = inputTaskString; // unparsed string
+
+
+
+
+		}
+		
+	}
+
+
+
+	function monthToNumber(inputString){
+		if(inputString=="Jan") return '01';
+		if(inputString=="Feb") return '02';
+		if(inputString=="Mar") return '03';
+		if(inputString=="Apr") return '04';
+		if(inputString=="May") return '05';
+		if(inputString=="Jun") return '06';
+		if(inputString=="Jul") return '07';
+		if(inputString=="Aug") return '08';
+		if(inputString=="Sep") return '09';
+		if(inputString=="Oct") return '10';
+		if(inputString=="Nov") return '11';
+		if(inputString=="Dec") return '12';
+	}
+
+	function lookupColorTally(inputHex){
+		for(var c=0;c<colorsArray.length;c++){
+			if(colorsArray[c][0]===inputHex) return colorsArray[c][1];
+		}
+		console.log('There was an error running the lookupColorTally function. The tally for a color was not found.');
+	}
+
+	function lookupProjectTally(inputID){
+		for(var i=0;i<projectsArray.length;i++){
+			if(projectsArray[i][0]===inputID[0]) return projectsArray[i][3];
+		}
+		console.log('There was an error running the lookupProjectTally function. The tally for a project was not found: '+inputID);
+	}
+
+	function lookupRainbowRanking(inputHex){
+		if(inputHex==='#000000') return 1; //black
+		else if(inputHex==="#777777") return 2; //dark gray
+		else if(inputHex==="#cccccc") return 3; //light gray
+		else if(inputHex==="#ac193d") return 4; //marroon
+		else if(inputHex==="#d24726") return 5;
+		else if(inputHex==="#dc4fad") return 6; 
+		else if(inputHex==="#ff8581") return 7;
+		else if(inputHex==="#fb886e") return 8; //end of red shades
+		else if(inputHex==="#d2b8a3") return 9; //brown
+		else if(inputHex==="#ffc471") return 10;
+		else if(inputHex==="#ffcc00") return 11;
+		else if(inputHex==="#f9ec75") return 12; //yellow
+		else if(inputHex==="#95ef63") return 13; //neon green
+		else if(inputHex==="#82ba00") return 14; //middle green
+		else if(inputHex==="#a8c8e4") return 15; //periwinkle
+		else if(inputHex==="#3bd5fb") return 16; //cyan
+		else if(inputHex==="#74e8d3") return 17; //sea green
+		else if(inputHex==="#5db2ff") return 18; //middle blue
+		else if(inputHex==="#03b3b2") return 19; //light turquoise
+		else if(inputHex==="#008299") return 20; //dark turquoise
+		else if(inputHex==="#0072c6") return 21; //dark blue
+		else if(inputHex==="#e2a8e4") return 22; //purple
+		else{console.log('There was an error running the lookupRainbowRanking function. The ranking for a color was not found: '+inputHex);
+			return -1;}
+	}
+
+
+	
+	function lookupProjectColor(inputProjectID){
+		
+		for(var pp=0;pp<projectsArray.length;pp++){
+			if (projectsArray[pp][2]===inputProjectID) return projectsArray[pp][1];
+		}
+		alert('Error looking up project color: '+tempString);
+		return '#000000';
+
+	}
+
+	function getRandomColor(){
+		var int = getRandomInt(omegaColorArray.length);
+		headerColorBackup = globalCurHeaderColor;
+		if(globalCurHeaderColor!==omegaColorArray[int]) {globalCurHeaderColor = omegaColorArray[int];return omegaColorArray[int];}
+		else {globalCurHeaderColor=headerColorBackup;return getRandomColor();}
+	}
+
+	function getRandomInt(inputInt){ //input is max integer (inclusive)
+		return Math.floor((Math.random() * inputInt) + 1);
+	}
+
+	function getProjectColorFromId(inputID){
+		for(var qq;qq<projectsArray.length;qq++){
+			alert(projectsArray[qq][2]);
+			if(projectsArray[qq][2]===inputID.toString()) alert( projectsArray[qq][1] );
+		}
+		console.log('There was an error looking the color of a project by the project ID.'+inputID.toString());
+		return;
+	}
+
+	function printNewBookmarkString(){
+		document.getElementById('bookmarkLink').innerHTML = "<b><br><br>"+(("https://joshuaexler.com/todo/index.html?token=" + token_input.value.toString())).link("https://joshuaexler.com/todo/index.html?token=" + token_input.value.toString());
+	}
+
+	function glowRandomTask(){
+		var curId = ("#picto" + getRandomInt(todaysTally).toString()).toString();
+		$(curId).trigger( 'mouseover' );
+
+		//alert(curId);
+		$(curId).animate({opacity:".2"},200);
+		$(curId).animate({opacity:".7"},200);
+		$(curId).animate({opacity:".2"},200);
+		$(curId).animate({opacity:".7"},200);
+		$(curId).animate({opacity:".2"},200);
+		$(curId).animate({opacity:".7"},200);
+		$('#pictogramTooltip').animate({opacity:0.7},1200);
+		$('#pictogramTooltip').animate({opacity:0},600);
+
+		
+
+	}
+
+	function glowTaskWeighted(){
+		var curDiceRoll = getRandomInt(10);
+		var curId = ("#picto" + getRandomInt(todaysTally).toString()).toString();
+		
+		var curPriorityAssign = ($(curId).parents("span").attr("id").replace('tasks',"").replace('Tasks',""))
+
+
+		if(curDiceRoll==1){ //green
+			
+			if(curPriorityAssign === "green"){
+				$(curId).trigger( 'mouseover' );
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$('#pictogramTooltip').animate({opacity:0.7},1200);
+				$('#pictogramTooltip').animate({opacity:0},600);
+			}
+			else{glowTaskWeighted();}
+			//if(curId.priority==curPriorityAssign) alert('true');
+		}
+		else if(curDiceRoll==2||curDiceRoll==3){ //yellow
+			if(curPriorityAssign === "yellow"){
+				$(curId).trigger( 'mouseover' );
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$('#pictogramTooltip').animate({opacity:0.7},1200);
+				$('#pictogramTooltip').animate({opacity:0},1200);
+			}
+			else{glowTaskWeighted();}
+
+		}
+		else if(curDiceRoll==4||curDiceRoll==5||curDiceRoll==6){ //orange
+			if(curPriorityAssign === "orange"){
+				$(curId).trigger( 'mouseover' );
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$('#pictogramTooltip').animate({opacity:0.7},1200);
+				$('#pictogramTooltip').animate({opacity:0},1200);
+			}
+			else{glowTaskWeighted();}
+
+		}
+		else if(curDiceRoll==7||curDiceRoll==8||curDiceRoll==9||curDiceRoll==10){ //red
+			if(curPriorityAssign === "red"){
+				$(curId).trigger( 'mouseover' );
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$(curId).animate({opacity:".2"},200);
+				$(curId).animate({opacity:".7"},200);
+				$('#pictogramTooltip').animate({opacity:0.7},1200);
+				$('#pictogramTooltip').animate({opacity:0},1200);
+			}
+			else{glowTaskWeighted();}
+
+		}
+		//alert(curDiceRoll);
+		//alert($(curId).parents("span").attr("id").replace('tasks',"").replace('Tasks',""));
+		var curGreenCount = 0;
+		var curYellowCount = 0;
+		var curOrangeCount = 0;
+		var curGreenCount = 0;
+	}
+
+	function showPictogramTooltip(inputString,inputColor){
+		//alert();
+		$('#pictogramTooltip').animate({opacity:0.7},0);
+
+		//pictogramTooltip.style.visibility = 'visible';
+		if(!inputString||inputString.length==0){
+			document.getElementById('pictogramTooltip').innerHTML = 'Test';}
+		else{document.getElementById('pictogramTooltip').innerHTML = inputString.fontcolor('#111111'); 
+			document.getElementById('pictogramTooltip').style.backgroundColor = inputColor;}
+		
+	}
+
+	function hidePictogramTooltip(inputString){
+		
+		$('#pictogramTooltip').animate({opacity:0},0);
+		//document.getElementById('pictogramTooltip').innerHTML = ' ';
+
+	}
+
+	function instantlyHidePictogramTooltip(){
+		document.getElementById('pictogramTooltip').innerHTML = ' ';
+		$('#pictogramTooltip').animate({opacity:0},0);
+	}
+
+	function getPictogramSrc(inputTaskString){
+		if( (((inputTaskString).toLowerCase()).split('please ')).length > 1 ){ //first
+			var curPictogram = 'pictograms/please.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split(' please')).length > 1 ){ //first
+			var curPictogram = 'pictograms/please.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split('light ')).length > 1 ){ //first
+			var curPictogram = 'pictograms/light_bulb.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split(' light')).length > 1 ){ //first
+			var curPictogram = 'pictograms/light_bulb.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split('idea ')).length > 1 ){ //first
+			var curPictogram = 'pictograms/light_bulb.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split('house')).length > 1 ){ //first
+			var curPictogram = 'pictograms/house.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split('real property')).length > 1 ){ //first
+			var curPictogram = 'pictograms/house.png';
+			return curPictogram;
+		}
+		if( (((inputTaskString).toLowerCase()).split(' idea ')).length > 1 ){ //first
+			var curPictogram = 'pictograms/light_bulb.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('walk')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dog_walk.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('coffee')).length > 1 ){ //second
+			var curPictogram = 'pictograms/coffee.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tea ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tea.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' tea')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tea.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('worm')).length > 1 ){ //second
+			var curPictogram = 'pictograms/worm.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tick ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tick.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('ticket')).length > 1 ){ //second
+			var curPictogram = 'pictograms/ticket.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' tick')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tick.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('flea')).length > 1 ){ //second
+			var curPictogram = 'pictograms/flea.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('fly ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/fly.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' fly')).length > 1 ){ //second
+			var curPictogram = 'pictograms/fly.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('dog')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dog.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('barkley')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dog.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('soggy')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cat.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cook')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cook.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('breakfast')).length > 1 ){ //second
+			var curPictogram = 'pictograms/breakfast.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('egg')).length > 1 ){ //second
+			var curPictogram = 'pictograms/breakfast.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('lunch')).length > 1 ){ //second
+			var curPictogram = 'pictograms/lunch.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('sandwich')).length > 1 ){ //second
+			var curPictogram = 'pictograms/lunch.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('dinner')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dinner.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('pizza')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dinner.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('respond')).length > 1 ){ //second
+			var curPictogram = 'pictograms/respond.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('reach out')).length > 1 ){ //second
+			var curPictogram = 'pictograms/respond.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('reply')).length > 1 ){ //second
+			var curPictogram = 'pictograms/respond.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('phone')).length > 1 ){ //second
+			var curPictogram = 'pictograms/phone.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('skype')).length > 1 ){ //second
+			var curPictogram = 'pictograms/webcam.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('vitamin')).length > 1 ){ //second
+			var curPictogram = 'pictograms/vitamin.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('rx')).length > 1 ){ //second
+			var curPictogram = 'pictograms/rx.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('yoga')).length > 1 ){ //second
+			var curPictogram = 'pictograms/yoga.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('mail')).length > 1 ){ //second
+			var curPictogram = 'pictograms/respond.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('call')).length > 1 ){ //second
+			var curPictogram = 'pictograms/phone.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('meditat')).length > 1 ){ //second
+			var curPictogram = 'pictograms/meditation.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('job app')).length > 1 ){ //second
+			var curPictogram = 'pictograms/job_app.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('application')).length > 1 ){ //second
+			var curPictogram = 'pictograms/job_app.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('github')).length > 1 ){ //second
+			var curPictogram = 'pictograms/github.png';
+			return curPictogram;
+		}
+		
+		
+		else if( (((inputTaskString).toLowerCase()).split('excel')).length > 1 ){ //second
+			var curPictogram = 'pictograms/pptx.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('spreadsheet')).length > 1 ){ //second
+			var curPictogram = 'pictograms/spreadsheet.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('3d')).length > 1 ){ //second
+			var curPictogram = 'pictograms/3d.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bug')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bug.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('d3')).length > 1 ){ //second
+			var curPictogram = 'pictograms/coding.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('data ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/data.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' data')).length > 1 ){ //second
+			var curPictogram = 'pictograms/data.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('html')).length > 1 ){ //second
+			var curPictogram = 'pictograms/html.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('python')).length > 1 ){ //second
+			var curPictogram = 'pictograms/coding.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('algorithm')).length > 1 ){ //second
+			var curPictogram = 'pictograms/coding.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('java')).length > 1 ){ //second
+			var curPictogram = 'pictograms/jar.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('download')).length > 1 ){ //second
+			var curPictogram = 'pictograms/download.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('certificat')).length > 1 ){ //second
+			var curPictogram = 'pictograms/certificate.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('xlsx')).length > 1 ){ //second
+			var curPictogram = 'pictograms/xlsx.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('xls')).length > 1 ){ //second
+			var curPictogram = 'pictograms/xls.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('docx')).length > 1 ){ //second
+			var curPictogram = 'pictograms/docx.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('doctor')).length > 1 ){ //second
+			var curPictogram = 'pictograms/doctor.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('doc file')).length > 1 ){ //second
+			var curPictogram = 'pictograms/doc.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('doc')).length > 1 ){ //second
+			var curPictogram = 'pictograms/.doc.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('wav ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wav.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.wav')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wav.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('wma ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wma.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.wma')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wma.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('txt ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/txt.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.txt')).length > 1 ){ //second
+			var curPictogram = 'pictograms/txt.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('tiff ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tiff.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.tiff')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tiff.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('avi ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/avi.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.avi')).length > 1 ){ //second
+			var curPictogram = 'pictograms/avi.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('rar ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/rar.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.rar')).length > 1 ){ //second
+			var curPictogram = 'pictograms/rar.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('css ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/css.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.css')).length > 1 ){ //second
+			var curPictogram = 'pictograms/css.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('iso ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/iso.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.iso')).length > 1 ){ //second
+			var curPictogram = 'pictograms/iso.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('gif ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/gif.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.gif')).length > 1 ){ //second
+			var curPictogram = 'pictograms/gif.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('exe file')).length > 1 ){ //second
+			var curPictogram = 'pictograms/exe.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.exe')).length > 1 ){ //second
+			var curPictogram = 'pictograms/exe.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('sql')).length > 1 ){ //second
+			var curPictogram = 'pictograms/sql.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('php')).length > 1 ){ //second
+			var curPictogram = 'pictograms/php.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('mp3')).length > 1 ){ //second
+			var curPictogram = 'pictograms/mp3.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('mdb')).length > 1 ){ //second
+			var curPictogram = 'pictograms/mdb.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('mongo')).length > 1 ){ //second
+			var curPictogram = 'pictograms/mdb.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('m4v')).length > 1 ){ //second
+			var curPictogram = 'pictograms/m4v.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('jpg')).length > 1 ){ //second
+			var curPictogram = 'pictograms/jpg.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('pdf')).length > 1 ){ //second
+			var curPictogram = 'pictograms/sql.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('psd')).length > 1 ){ //second
+			var curPictogram = 'pictograms/psd.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('pptx')).length > 1 ){ //second
+			var curPictogram = 'pictograms/pptx.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('ppt')).length > 1 ){ //second
+			var curPictogram = 'pictograms/ppt.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('zipx')).length > 1 ){ //second
+			var curPictogram = 'pictograms/zipx.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('zip file')).length > 1 ){ //second
+			var curPictogram = 'pictograms/zip.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('zipper')).length > 1 ){ //second
+			var curPictogram = 'pictograms/zipper.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('zip')).length > 1 ){ //second
+			var curPictogram = 'pictograms/zip.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('bmp')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bmp.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('cdr')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cdr.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('csv')).length > 1 ){ //second
+			var curPictogram = 'pictograms/csv.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('illustrator')).length > 1 ){ //second
+			var curPictogram = 'pictograms/illustrator.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('png')).length > 1 ){ //second
+			var curPictogram = 'pictograms/png.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('wmv')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wmv.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split('floss')).length > 1 ){ //second
+			var curPictogram = 'pictograms/floss.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('vac')).length > 1 ){ //second
+			var curPictogram = 'pictograms/vacuum.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('fruit')).length > 1 ){ //second
+			var curPictogram = 'pictograms/fruit.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('mop')).length > 1 ){ //second
+			var curPictogram = 'pictograms/mop.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('graph')).length > 1 ){ //second
+			var curPictogram = 'pictograms/graph.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('dash')).length > 1 ){ //second
+			var curPictogram = 'pictograms/graph.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bed ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bed.png';
+			return curPictogram;
+		}
+
+		else if( (((inputTaskString).toLowerCase()).split(' bed')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bed.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('sleep')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bed.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cube')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cube.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('internet')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('url')).length > 1 ){ //second
+			var curPictogram = 'pictograms/url.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('dll')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dll.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('poop')).length > 1 ){ //second
+			var curPictogram = 'pictograms/poop.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('litter')).length > 1 ){ //second
+			var curPictogram = 'pictograms/poop.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('trash')).length > 1 ){ //second
+			var curPictogram = 'pictograms/trash.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('recycl')).length > 1 ){ //second
+			var curPictogram = 'pictograms/recycling.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('organiz')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tidy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tidy')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tidy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tidingtons')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tidy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('money')).length > 1 ){ //second
+			var curPictogram = 'pictograms/money.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('spend')).length > 1 ){ //second
+			var curPictogram = 'pictograms/money.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('expense')).length > 1 ){ //second
+			var curPictogram = 'pictograms/money.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('calendar')).length > 1 ){ //second
+			var curPictogram = 'pictograms/calendar.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('inbox')).length > 1 ){ //second
+			var curPictogram = 'pictograms/inbox.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('shave')).length > 1 ){ //second
+			var curPictogram = 'pictograms/shave.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('closet')).length > 1 ){ //second
+			var curPictogram = 'pictograms/closet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('savings')).length > 1 ){ //second
+			var curPictogram = 'pictograms/savings.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('ira')).length > 1 ){ //second
+			var curPictogram = 'pictograms/savings.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('post office')).length > 1 ){ //second
+			var curPictogram = 'pictograms/post_office.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('office')).length > 1 ){ //second
+			var curPictogram = 'pictograms/office.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('drink')).length > 1 ){ //second
+			var curPictogram = 'pictograms/drink.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cake')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cake.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('party')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cake.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('buy ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/buy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' buy')).length > 1 ){ //second
+			var curPictogram = 'pictograms/buy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('amazon')).length > 1 ){ //second
+			var curPictogram = 'pictograms/buy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('wake')).length > 1 ){ //second
+			var curPictogram = 'pictograms/alarm.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('alarm')).length > 1 ){ //second
+			var curPictogram = 'pictograms/alarm.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('seed')).length > 1 ){ //second
+			var curPictogram = 'pictograms/seed.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('plant')).length > 1 ){ //second
+			var curPictogram = 'pictograms/plant.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('water')).length > 1 ){ //second
+			var curPictogram = 'pictograms/water.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('snake')).length > 1 ){ //second
+			var curPictogram = 'pictograms/snake.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tiger')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tiger.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('monkey')).length > 1 ){ //second
+			var curPictogram = 'pictograms/monkey.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('mosquioto')).length > 1 ){ //second
+			var curPictogram = 'pictograms/mosquioto.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bees')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bees.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bear')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bear.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('beer')).length > 1 ){ //second
+			var curPictogram = 'pictograms/beer.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('drum')).length > 1 ){ //second
+			var curPictogram = 'pictograms/drumset.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('wine')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wine.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('drink')).length > 1 ){ //second
+			var curPictogram = 'pictograms/drink.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bath')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bath.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('read')).length > 1 ){ //second
+			var curPictogram = 'pictograms/book.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('report')).length > 1 ){ //second
+			var curPictogram = 'pictograms/report.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('rout')).length > 1 ){ //second
+			var curPictogram = 'pictograms/route.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('hotel')).length > 1 ){ //second
+			var curPictogram = 'pictograms/hotel.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('flight')).length > 1 ){ //second
+			var curPictogram = 'pictograms/flight.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('checkin')).length > 1 ){ //second
+			var curPictogram = 'pictograms/checkin.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('check in')).length > 1 ){ //second
+			var curPictogram = 'pictograms/checkin.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('check-in')).length > 1 ){ //second
+			var curPictogram = 'pictograms/checkin.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split('reserv')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('schedule')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('appointment')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('appt')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('meeting')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('mtg')).length > 1 ){ //second
+			var curPictogram = 'pictograms/reserve.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('clothes')).length > 1 ){ //second
+			var curPictogram = 'pictograms/clothes.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('laundry')).length > 1 ){ //second
+			var curPictogram = 'pictograms/clothes.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('sheep')).length > 1 ){ //second
+			var curPictogram = 'pictograms/sheep.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('umbrella')).length > 1 ){ //second
+			var curPictogram = 'pictograms/umbrella.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('microwave')).length > 1 ){ //second
+			var curPictogram = 'pictograms/microwave.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('dish')).length > 1 ){ //second
+			var curPictogram = 'pictograms/dish.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('swim')).length > 1 ){ //second
+			var curPictogram = 'pictograms/swim.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('shower')).length > 1 ){ //second
+			var curPictogram = 'pictograms/shower.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('laundr')).length > 1 ){ //second
+			var curPictogram = 'pictograms/laundry.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bike')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bike.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cycle')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bike.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('fix')).length > 1 ){ //second
+			var curPictogram = 'pictograms/fix.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('wrench')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wrench.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('horse')).length > 1 ){ //second
+			var curPictogram = 'pictograms/horse.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('wheelchair')).length > 1 ){ //second
+			var curPictogram = 'pictograms/wheelchair.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('gas')).length > 1 ){ //second
+			var curPictogram = 'pictograms/gas.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('book')).length > 1 ){ //second
+			var curPictogram = 'pictograms/book.png';
+			return curPictogram;
+		}
+		
+		else if( (((inputTaskString).toLowerCase()).split(' cat')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cat.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cat ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cat.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' eat')).length > 1 ){ //second
+			var curPictogram = 'pictograms/eat.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('eat ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/eat.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('football')).length > 1 ){ //second
+			var curPictogram = 'pictograms/football.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('foot ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' foot')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('feet ')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' feet')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('clip finger')).length > 1 ){ //second
+			var curPictogram = 'pictograms/clipper.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' foot')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' foot')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split(' foot')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('clip toe')).length > 1 ){ //second
+			var curPictogram = 'pictograms/clipper.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('toenail')).length > 1 ){ //second
+			var curPictogram = 'pictograms/foot.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('bowling')).length > 1 ){ //second
+			var curPictogram = 'pictograms/bowling.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('cricket')).length > 1 ){ //second
+			var curPictogram = 'pictograms/cricket.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('hockey')).length > 1 ){ //second
+			var curPictogram = 'pictograms/hockey.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('baseball')).length > 1 ){ //second
+			var curPictogram = 'pictograms/baseball.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('rugby')).length > 1 ){ //second
+			var curPictogram = 'pictograms/rubgy.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('soccer')).length > 1 ){ //second
+			var curPictogram = 'pictograms/soccer.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('tennis')).length > 1 ){ //second
+			var curPictogram = 'pictograms/tennis.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('volley ball')).length > 1 ){ //second
+			var curPictogram = 'pictograms/volleyball.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('volleyball')).length > 1 ){ //second
+			var curPictogram = 'pictograms/volleyball.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.com')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.org')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.net')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('.co.uk')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString).toLowerCase()).split('http')).length > 1 ){ //second
+			var curPictogram = 'pictograms/internet.png';
+			return curPictogram;
+		}
+		
+
+		else if( (((inputTaskString).toLowerCase()).split('*')).length > 1 ){ //second
+			var curPictogram = 'pictograms/asterisk.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('a')).length > 1 ){ //second
+			var curPictogram = 'pictograms/a.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('b')).length > 1 ){ //second
+			var curPictogram = 'pictograms/b.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('c')).length > 1 ){ //second
+			var curPictogram = 'pictograms/c.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('d')).length > 1 ){ //second
+			var curPictogram = 'pictograms/d.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('e')).length > 1 ){ //second
+			var curPictogram = 'pictograms/e.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('f')).length > 1 ){ //second
+			var curPictogram = 'pictograms/f.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('g')).length > 1 ){ //second
+			var curPictogram = 'pictograms/g.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('h')).length > 1 ){ //second
+			var curPictogram = 'pictograms/h.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('i')).length > 1 ){ //second
+			var curPictogram = 'pictograms/i.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('j')).length > 1 ){ //second
+			var curPictogram = 'pictograms/j.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('k')).length > 1 ){ //second
+			var curPictogram = 'pictograms/k.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('l')).length > 1 ){ //second
+			var curPictogram = 'pictograms/l.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('m')).length > 1 ){ //second
+			var curPictogram = 'pictograms/m.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('n')).length > 1 ){ //second
+			var curPictogram = 'pictograms/n.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('o')).length > 1 ){ //second
+			var curPictogram = 'pictograms/o.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('p')).length > 1 ){ //second
+			var curPictogram = 'pictograms/p.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('q')).length > 1 ){ //second
+			var curPictogram = 'pictograms/q.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('r')).length > 1 ){ //second
+			var curPictogram = 'pictograms/r.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('s')).length > 1 ){ //second
+			var curPictogram = 'pictograms/s.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('t')).length > 1 ){ //second
+			var curPictogram = 'pictograms/t.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('u')).length > 1 ){ //second
+			var curPictogram = 'pictograms/u.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('v')).length > 1 ){ //second
+			var curPictogram = 'pictograms/v.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('w')).length > 1 ){ //second
+			var curPictogram = 'pictograms/w.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('x')).length > 1 ){ //second
+			var curPictogram = 'pictograms/x.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('y')).length > 1 ){ //second
+			var curPictogram = 'pictograms/y.png';
+			return curPictogram;
+		}
+
+else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ //second
+			var curPictogram = 'pictograms/z.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('0')).length > 1 ){ //second
+			var curPictogram = 'pictograms/0.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('8')).length > 1 ){ //second
+			var curPictogram = 'pictograms/8.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('9')).length > 1 ){ //second
+			var curPictogram = 'pictograms/9.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('1')).length > 1 ){ //second
+			var curPictogram = 'pictograms/1.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('2')).length > 1 ){ //second
+			var curPictogram = 'pictograms/2.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('3')).length > 1 ){ //second
+			var curPictogram = 'pictograms/3.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('4')).length > 1 ){ //second
+			var curPictogram = 'pictograms/4.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('5')).length > 1 ){ //second
+			var curPictogram = 'pictograms/5.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('6')).length > 1 ){ //second
+			var curPictogram = 'pictograms/6.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('7')).length > 1 ){ //second
+			var curPictogram = 'pictograms/7.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('+')).length > 1 ){ //second
+			var curPictogram = 'pictograms/+.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('=')).length > 1 ){ //second
+			var curPictogram = 'pictograms/=.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('-')).length > 1 ){ //second
+			var curPictogram = 'pictograms/-.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('%')).length > 1 ){ //second
+			var curPictogram = 'pictograms/%.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('&')).length > 1 ){ //second
+			var curPictogram = 'pictograms/&.png';
+			return curPictogram;
+		}
+		else if( (((inputTaskString.charAt(0)).toLowerCase()).split('!')).length > 1 ){ //second
+			var curPictogram = 'pictograms/!.png';
+			return curPictogram;
+		}
+
+
+		else return 'pictograms/task.png';
+	}
+
+	</script>
+	</head>
+	<body style="background-color: #000000; color:#333333; text-align:center;">
+
+	<table width="836px">
+	
+	<tr><td><center><p id="headerArea" style="width:300px;background-color: #333333; color: #dddddd; border:4px solid #dddddd; border-radius:25px;font: 20px arial, sans-serif;"><b><br>Todo Daily Dashboard</b><br><i>Generate a bookmark below to get started</i><br><span id='syncCountdown' style="background-color: #333333; color: #333333; font-size: 12px; "></span><span id="weatherReport"></span></p></center></td></tr>
+	<tr id="rowContainingIntroContent">
+	<td><p id="introText" style="background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif; width: 810px"><br>Visualize your daily list of tasks in an interactive dashboard.<br><br>&#9679; Generates using the <a href='https://github.com/OiYouYeahYou/Todoist.js'>Todoist Javascript API</a><br>&#9679; Desktop and mobile friendly<br>&#9679; Syncs with Todoist every sixty seconds<br><br></p><table><tr><td><img src="todo_screenshot.PNG" id="screenshot" width="300px" style="position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.3)));"></td>
+	<td ><p id="outerP" style="position:relative; padding: 5px; top:-105px;width:90%; background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif;"><span id='genBookmark' ">To find your Todoist API token, go to Settings --> Integrations. Copy and paste your API token from the bottom of that page into the text field below.<input type="text" id='token_input' autocomplete='on' style="width:300px; font-style: italic" value='Paste your Todoist API token here' onchange="printNewBookmarkString()"></input><span id="bookmarkLink"><b><br><br><br>Bookmark this Link:</b><br>https://joshuaexler.com/todo/</span></span></td>
+	</tr></table></td>
+	
+	</tr>
+	<tr>
+	<td>
+	<img src="pictogram_screenshot.PNG" id="screenshot2" width="400px" style="top:-140px;left:140px;position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.1)));">
+	</td>
+	</tr>
+	
+	</table>
+	<p id="filler1"><br></p>
+	<p id="filler2"><br></p>
+	<p id="filler3"><br></p>
+	<p id="filler4"><br></p>
+	<p id="filler5"><br></p>
+	
+
+	<p id="credits1" style="position: relative; z-index: 9; align: right;color: #333333; background-color: #dddddd; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 836px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> June 19th, 2017 (v 1.1).<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p>
+	
+	<table width="800px">
+
+	<tr>
+	<td width = "50%" ><canvas id="canvasOne" class="canvasClass" height="200px" width="400px" style="min-width:400px;max-width:400px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd;"></canvas></td>
+	
+	<td width = "50%" ><canvas id="canvasTwo" class="canvasClass" height="200px" width="400px" style="min-width:400px;max-width:400px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas>
+	</tr>
+
+	</table>
+	<table width="830px">
+	<tr>
+	<td width = "100%" ><canvas id="canvasThree" class="canvasClass" height="250px" width="800px" style="min-width:800px;max-width:800px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas></td>
+
+	</tr>
+	<tr>
+	<td width = "100%" ><canvas id="canvasFour" class="canvasClass" height="350px" style="min-width:800px;max-width:800px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd" width="800px"></canvas></td>
+
+	</tr>
+
+	<tr>
+
+	<td><center><hr>
+	<p id="taskGenButtons"  style="position:relative; z-index:999; top: 70px; line-height:100%;padding:0px;color:#333333; visibility: visible; border:0px solid #333333; border-radius:15px; background-color:rbga(0,0,0,0); width:300px;"><img width="85px" src="pictograms/coach.png" style="padding:2px;border:2px solid #000000; border-radius:45px; background-color:#dddddd; font-size:16px;" onclick="glowTaskWeighted()" onmouseover="showPictogramTooltip('What&rsquo;s next? Ask your life coach.','#dddddd')" onmouseout="hidePictogramTooltip()" id="glowWeighted" ></img>&nbsp;&nbsp;&nbsp;<img width="85px" onmouseover="showPictogramTooltip('What&rsquo;s next? Roll the dice.','#dddddd')" onmouseout="hidePictogramTooltip()" src="pictograms/dice.png" style="font-size:16px; padding:2px;border:2px solid #000000; border-radius:45px; background-color:#dddddd;"onclick="glowRandomTask()" id="glowRandom"></image></p></center>
+	<p id="taskLogOutput" style="line-height:350%;padding:10px;color:#333333; visibility: visible; border:0px solid #dddddd; border-radius:25px; background-color:#000000; width:800px; position: relative; top:-100px;"><span style="line-height:100%; font: 14px arial, sans-serif; color: #dddddd"><b>Tasks Remaining Today</b><br><br><br></span><span id="redTasks"  style="border:0px solid #333333;"></span><span id="orangeTasks"></span><span id="yellowTasks"></span><span id="greenTasks"></span></p>
+	
+	
+	
+	</td>
+	</tr>
+	</table>
+
+	<table width="830px">
+	<tr>
+	
+	<td><p style="width:100%;"><p id="credits2" style="position: absolute; align: center;color: #333333; background-color: #999999; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 820px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> June 19th, 2017 (v. 1.1).<br>Questions? Email joshua (at) joshua (dot) consulting or see <a href="README.txt">readme</a>.<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p><br><br></td>
+	
+	</tr>
+	</table>
+	<p id="pictogramTooltip" style="background-color: #777777; color:#000000; z-index:9999; max-width:300px;  color:#dddddd; padding: 5px;border:2px solid #000000; opacity:0.7; border-radius:15px;background-color: #333333; position: absolute; float:left; font: 14px arial, sans-serif; font-weight: bold;"></p>
+	
+
+
+
+	</body>
+	</html>
