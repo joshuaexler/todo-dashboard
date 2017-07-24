@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-	<title>Todo Daily Dashboard - v. 1.1 - Joshua Exler</title>
+	<title>Todo Daily Dashboard - v. 1.11 - Joshua Exler</title>
 	<!--<link rel="stylesheet" type="text/css" media="screen" href="todoiststyle.css" />-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script type="text/javascript" src="todoist.js"></script>
@@ -208,45 +208,66 @@ $(".picto").hover(function(){
 /*--------------------------------------------------------------------------------------------------------------------------------*/
 
 barChartDataOne = { //COMPLETED VS. REMAINING
-			labels : ["Completed Today","Remaining Today"],
+			labels : [,],
 			datasets : [
 				{
-					label: "Total Completed Today", //position 0 "Total Completed Today"
-					fillColor : ['#666666','#cccccc'],
-					strokeColor : ['#666666','#cccccc'],
-					pointColor : ['#000000','#333333'],
-					pointStrokeColor : "#fff",
-					data : [completedToday,totalDailyRem]
+					label: "Completed ", //position 0 "Total Completed Today"
+					fillColor : ['#6dc066'],
+					strokeColor : ['#6dc066'],
+					pointColor : ['#6dc066'],
+					pointStrokeColor : '#6dc066',
+					data : [completedToday],
+
+					
 				},	
+				{
+					label: "Remaining ", //position 0 "Total Completed Today"
+					fillColor : ['#FF5353'],
+					strokeColor : ['#FF5353'],
+					pointColor :  ['#FF5353'],
+					pointStrokeColor : '#FF5353',
+					data : [totalDailyRem],
+				},	
+				
 			]
 		};
 
-		barChartDataOne.datasets[0].data = [completedToday,totalDailyRem];
-
+		//barChartDataOne.datasets[0].data = [completedToday];
+		//barChartDataOne.datasets[1].data = [totalDailyRem];
+		//barChartDataOne.datasets[1].fillColor = ['#FB4941'];
+		
+		barChartDataOne.labels=[,];
 		var ctxOne = document.getElementById("canvasOne").getContext("2d");
-		window.myBarOne = new Chart(ctxOne).Bar(barChartDataOne , {
+		window.myBarOne = new Chart(ctxOne).Pie(barChartDataOne , {
 			graphTitle: 'Total Completed Today vs. Total Remaining Today',
 			graphTitleFontSize: 14,
 			graphTitleFontColor: '#dddddd',
 			scaleFontColor: '#dddddd',
 			inGraphDataFontColor: '#dddddd',
-			tooltipFontSize: 14,
+			tooltipFontSize: 10,
 			annotateDisplay: true,
 			annotateLabel: ['<%=v3%> Tasks'],
 			inGraphDataShow: true,
+			inGraphDataAnglePosition : 2,
+      inGraphDataRadiusPosition: 2,
+      //inGraphDataRotate : "inRadiusAxisRotateLabels",
+      inGraphDataAlign : "center",
+      inGraphDataVAlign : "middle",
+      inGraphDataFontColor : "white",
+   	segmentShowStroke: false,
 			inGraphDataFontStyle: 'bold',
-			inGraphDataFontSize: '16',
+			inGraphDataFontSize: '14',
 			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
-			pointDot: false,
+			//pointDot: false,
 			showTooltips: true,
-			scaleShowGridLines : true,
-			populateSparseData: true,
-			maxBarWidth: 80,
-         overlayBars: false,
-         datasetFill: false,
-         yAxisMinimumInterval: 1,
-          scaleOverlay: true,
-          graphMin: 0,
+			
+			//maxBarWidth: 80,
+         //overlayBars: false,
+         //datasetFill: false,
+         //yAxisMinimumInterval: 1,
+          //scaleOverlay: true,
+          //graphMin: 0,
+
           canvasBackgroundColor: '#333333',
 
         
@@ -517,15 +538,19 @@ barChartDataOne = { //COMPLETED VS. REMAINING
 
 	//setInterval(async function
 		setInterval(function(){
+			document.getElementById('canvasOne')
 				//var newHeaderColor = getRandomColor();
 				//$('#headerArea').animate({borderColor:newHeaderColor},1000);
-				document.getElementById('taskLogOutput').innerHTML = "<span style='line-height:100%; font: 16px arial, sans-serif; color: #dddddd'><b>Tasks Remaining Today</b><br><br><br></span><span id='redTasks'></span><span id='orangeTasks'></span><span id='yellowTasks'></span><span id='greenTasks'></span>";
+				document.getElementById('taskLogOutput').innerHTML = "<span style='line-height:100%; font: 14px arial, sans-serif; color: #dddddd'><b>Tasks Remaining Today&nbsp;&nbsp;&nbsp;</b><br><br><br></span><span id='redTasks'></span><span id='orangeTasks'></span><span id='yellowTasks'></span><span id='greenTasks'></span>";
 				stringArray = ['0th element','canvasOne','canvasTwo','canvasThree','canvasFour'];
+				
 				for(stringItr=1;stringItr<5;stringItr++){
 					canvasTarget = document.getElementById(stringArray[stringItr]);
 					ctx = canvasTarget.getContext('2d');
 					ctx.clearRect(0, 0, canvasTarget.width, canvasTarget.height);
-					ctx.font = "20px Arial";
+					ctx.font = "14px Arial";
+					//ctx.fontColor = "#000000";
+					ctx.fillStyle = "#cccccc";
 					ctx.fillText("Syncing...",canvasTarget.width/1.9,canvasTarget.height/2);
 					
 					//#STRAT HEAR: You might have to put the syncing text back. But maybe you could instead of a blank fillRect with a ctx-->png of the graph content, for that second or two?
@@ -1949,19 +1974,20 @@ else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ 
 	</script>
 	</head>
 	<body style="background-color: #000000; color:#333333; text-align:center;">
-
+	<center>
 	<table width="836px">
-	
-	<tr><td><center><p id="headerArea" style="width:300px;background-color: #333333; color: #dddddd; border:4px solid #dddddd; border-radius:25px;font: 20px arial, sans-serif;"><b><br>Todo Daily Dashboard</b><br><i>Generate a bookmark below to get started</i><br><span id='syncCountdown' style="background-color: #333333; color: #333333; font-size: 12px; "></span><span id="weatherReport"></span></p></center></td></tr>
+	<center>
+	<table width="830px">
+	<tr><td><center><p id="headerArea" style="width:300px;background-color: #333333; text-align: center; color: #dddddd; border:4px solid #dddddd; border-radius:25px;font: 20px arial, sans-serif;"><b><br>Todo Daily Dashboard</b><br><i>Generate a bookmark below to get started</i><br><span id='syncCountdown' style="background-color: #333333; color: #333333; font-size: 12px; "></span><span id="weatherReport"></span></p></center></td></tr>
 	<tr id="rowContainingIntroContent">
-	<td><p id="introText" style="background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif; width: 810px"><br>Visualize your daily list of tasks in an interactive dashboard.<br><br>&#9679; Generates using the <a href='https://github.com/OiYouYeahYou/Todoist.js'>Todoist Javascript API</a><br>&#9679; Desktop and mobile friendly<br>&#9679; Syncs with Todoist every sixty seconds<br><br></p><table><tr><td><img src="todo_screenshot.PNG" id="screenshot" width="300px" style="position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.3)));"></td>
-	<td ><p id="outerP" style="position:relative; padding: 5px; top:-105px;width:90%; background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif;"><span id='genBookmark' ">To find your Todoist API token, go to Settings --> Integrations. Copy and paste your API token from the bottom of that page into the text field below.<input type="text" id='token_input' autocomplete='on' style="width:300px; font-style: italic" value='Paste your Todoist API token here' onchange="printNewBookmarkString()"></input><span id="bookmarkLink"><b><br><br><br>Bookmark this Link:</b><br>https://joshuaexler.com/todo/</span></span></td>
+	<td><p id="introText" style="background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif; text-align:center; width: 810px"><br>Visualize your daily list of tasks in an interactive dashboard.<br><br>&#9679; Generates using the <a href='https://github.com/OiYouYeahYou/Todoist.js'>Todoist Javascript API</a><br>&#9679; Desktop and mobile friendly<br>&#9679; Syncs with Todoist every sixty seconds<br><br></p><table><tr><td><img src="todo_screenshot.PNG" id="screenshot" width="300px" style="position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.3)));"></td>
+	<td ><p id="outerP" style="position:relative; padding: 5px; top:-105px;width:90%; background-color: #dddddd; border:4px solid #333333; border-radius:15px;font: 12px arial, sans-serif; text-align:center; "><span id='genBookmark' ">To find your Todoist API token, go to Settings --> Integrations. Copy and paste your API token from the bottom of that page into the text field below.<input type="text" id='token_input' autocomplete='on' style="width:300px; font-style: italic" value='Paste your Todoist API token here' onchange="printNewBookmarkString()"></input><span id="bookmarkLink"><b><br><br><br>Bookmark this Link:</b><br>https://joshuaexler.com/todo/</span></span></td>
 	</tr></table></td>
 	
 	</tr>
 	<tr>
 	<td>
-	<img src="pictogram_screenshot.PNG" id="screenshot2" width="400px" style="top:-140px;left:140px;position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.1)));">
+	<img src="pictogram_screenshot.PNG" id="screenshot2" width="400px" style="top:-140px; left:320px;position: relative; z-index: 2; -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), to(rgba(250, 250, 250, 0.1)));">
 	</td>
 	</tr>
 	
@@ -1973,32 +1999,38 @@ else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ 
 	<p id="filler5"><br></p>
 	
 
-	<p id="credits1" style="position: relative; z-index: 9; align: right;color: #333333; background-color: #dddddd; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 836px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> June 19th, 2017 (v 1.1).<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p>
+	<p id="credits1" style="position: relative; z-index: 9; align: right;color: #333333; background-color: #dddddd; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 836px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 24th, 2017 (v 1.11).<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p>
+
+
 	
+	<tr><td>
 	<table width="800px">
 
 	<tr>
-	<td width = "50%" ><canvas id="canvasOne" class="canvasClass" height="200px" width="400px" style="min-width:400px;max-width:400px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd;"></canvas></td>
+	<td width = "50%" ><canvas id="canvasOne" class="canvasClass" height="200px" width="410px" style="min-width:410px;max-width:410px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd;"></canvas></td>
+	<td></td>
 	
-	<td width = "50%" ><canvas id="canvasTwo" class="canvasClass" height="200px" width="400px" style="min-width:400px;max-width:400px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas>
+	<td width = "50%" ><canvas id="canvasTwo" class="canvasClass" height="200px" width="410px" style="min-width:410px;max-width:410px; min-height:200px; max-height:200px; border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas>
 	</tr>
 
 	</table>
+	</td></tr>
+	<tr><td>
 	<table width="830px">
 	<tr>
-	<td width = "100%" ><canvas id="canvasThree" class="canvasClass" height="250px" width="800px" style="min-width:800px;max-width:800px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas></td>
+	<td width = "100%" ><canvas id="canvasThree" class="canvasClass" height="250px" width="830px" style="min-width:830px;max-width:830px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd"></canvas></td>
 
 	</tr>
 	<tr>
-	<td width = "100%" ><canvas id="canvasFour" class="canvasClass" height="350px" style="min-width:800px;max-width:800px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd" width="800px"></canvas></td>
+	<td width = "100%" ><canvas id="canvasFour" class="canvasClass" height="350px" style="min-width:830px;max-width:830px;border:2px solid #dddddd; border-radius:25px; background-color:#dddddd" width="830px"></canvas></td>
 
 	</tr>
 
 	<tr>
 
-	<td><center><hr>
-	<p id="taskGenButtons"  style="position:relative; z-index:999; top: 70px; line-height:100%;padding:0px;color:#333333; visibility: visible; border:0px solid #333333; border-radius:15px; background-color:rbga(0,0,0,0); width:300px;"><img width="85px" src="pictograms/coach.png" style="padding:2px;border:2px solid #000000; border-radius:45px; background-color:#dddddd; font-size:16px;" onclick="glowTaskWeighted()" onmouseover="showPictogramTooltip('What&rsquo;s next? Ask your life coach.','#dddddd')" onmouseout="hidePictogramTooltip()" id="glowWeighted" ></img>&nbsp;&nbsp;&nbsp;<img width="85px" onmouseover="showPictogramTooltip('What&rsquo;s next? Roll the dice.','#dddddd')" onmouseout="hidePictogramTooltip()" src="pictograms/dice.png" style="font-size:16px; padding:2px;border:2px solid #000000; border-radius:45px; background-color:#dddddd;"onclick="glowRandomTask()" id="glowRandom"></image></p></center>
-	<p id="taskLogOutput" style="line-height:350%;padding:10px;color:#333333; visibility: visible; border:0px solid #dddddd; border-radius:25px; background-color:#000000; width:800px; position: relative; top:-100px;"><span style="line-height:100%; font: 14px arial, sans-serif; color: #dddddd"><b>Tasks Remaining Today</b><br><br><br></span><span id="redTasks"  style="border:0px solid #333333;"></span><span id="orangeTasks"></span><span id="yellowTasks"></span><span id="greenTasks"></span></p>
+	<td><center>
+	<p id="taskGenButtons"  style="position:relative; z-index:999; top: 70px; line-height:100%;padding:0px;color:#333333; visibility: visible; border:0px solid #333333; border-radius:15px; background-color:rbga(0,0,0,0); width:300px;"><img width="85px" src="pictograms/coach.png" style="padding:0px;border:2px solid #ffffff; border-radius:45px; background-color:#dddddd; font-size:16px;" onclick="glowTaskWeighted()" onmouseover="showPictogramTooltip('What&rsquo;s next? Ask your life coach.','#dddddd')" onmouseout="hidePictogramTooltip()" id="glowWeighted" ></img>&nbsp;&nbsp;&nbsp;<img width="85px" onmouseover="showPictogramTooltip('What&rsquo;s next? Roll the dice.','#dddddd')" onmouseout="hidePictogramTooltip()" src="pictograms/dice.png" style="font-size:16px; padding:0px;border:2px solid #ffffff; border-radius:45px; background-color:#dddddd;"onclick="glowRandomTask()" id="glowRandom"></image></p></center>
+	<p id="taskLogOutput" style="line-height:350%;padding:10px;color:#333333; text-align: center; visibility: visible; border:0px solid #dddddd; border-radius:25px; background-color:#000000; width:800px; position: relative; top:-100px;left:15px;"><span style="line-height:100%; font: 14px arial, sans-serif; color: #dddddd"><b>Tasks Remaining Today&nbsp;&nbsp;&nbsp;</b><br><br><br></span><span id="redTasks"  style="border:0px solid #333333;"></span><span id="orangeTasks"></span><span id="yellowTasks"></span><span id="greenTasks"></span></p>
 	
 	
 	
@@ -2009,14 +2041,17 @@ else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ 
 	<table width="830px">
 	<tr>
 	
-	<td><p style="width:100%;"><p id="credits2" style="position: absolute; align: center;color: #333333; background-color: #999999; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 820px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> June 19th, 2017 (v. 1.1).<br>Questions? Email joshua (at) joshua (dot) consulting or see <a href="README.txt">readme</a>.<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p><br><br></td>
+	<td><p style="width:100%;"><p id="credits2" style="position: absolute; text-align: center;color: #333333; background-color: #999999; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 820px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 24th, 2017 (v. 1.11).<br>Questions? Email joshua (at) joshua (dot) consulting or see <a href="README.txt">readme</a>.<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p><br><br></td>
 	
 	</tr>
 	</table>
+	</td></tr>
+	</table>
+	</center>
 	<p id="pictogramTooltip" style="background-color: #777777; color:#000000; z-index:9999; max-width:300px;  color:#dddddd; padding: 5px;border:2px solid #000000; opacity:0.7; border-radius:15px;background-color: #333333; position: absolute; float:left; font: 14px arial, sans-serif; font-weight: bold;"></p>
 	
 
 
-
+	</center>
 	</body>
 	</html>

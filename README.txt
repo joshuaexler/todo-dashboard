@@ -1,6 +1,6 @@
-Todo Daily Dashboard - version 1.1
+Todo Daily Dashboard - version 1.11
 Author: Joshua Exler (https://joshuaexler.com). Questions? Contact joshua (at) joshua (dot) consulting
-Most recent edit: June 19th, 2017
+Most recent edit: July 24th, 2017
 License: MIT. See LICENSE.txt.
 
 PROMINENTLY USED LIBRARIES:
@@ -10,6 +10,7 @@ ChartNew.js by FVANCOP: https://github.com/FVANCOP/ChartNew.js
 Icons used for task pictograms are from The Noun Project (https://nounproject.com)
 
 CHANGELOG
+v. 1.11: Changed first chart to a pie chart and centered all content on page
 v. 1.1: Added pictogram hover tooltips, a 'life coach' algorithm to suggest tasks weighted by priority, and an algorithm to suggest tasks randomly
 v. 1.09: The area containing tasks-as-pictograms is now called 'Tasks Remaining Today' and is styled more similarly to the graphs' styling
 v. 1.08: Tweaked priority colors and styling of pictograms
