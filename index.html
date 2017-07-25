@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-	<title>Todo Daily Dashboard - v. 1.11 - Joshua Exler</title>
+	<title>Todo Daily Dashboard - v. 1.12 - Joshua Exler</title>
 	<!--<link rel="stylesheet" type="text/css" media="screen" href="todoiststyle.css" />-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script type="text/javascript" src="todoist.js"></script>
@@ -211,7 +211,7 @@ barChartDataOne = { //COMPLETED VS. REMAINING
 			labels : [,],
 			datasets : [
 				{
-					label: "Completed ", //position 0 "Total Completed Today"
+					label: "Completed", //position 0 "Total Completed Today"
 					fillColor : ['#6dc066'],
 					strokeColor : ['#6dc066'],
 					pointColor : ['#6dc066'],
@@ -221,7 +221,7 @@ barChartDataOne = { //COMPLETED VS. REMAINING
 					
 				},	
 				{
-					label: "Remaining ", //position 0 "Total Completed Today"
+					label: "Remaining", //position 0 "Total Completed Today"
 					fillColor : ['#FF5353'],
 					strokeColor : ['#FF5353'],
 					pointColor :  ['#FF5353'],
@@ -257,10 +257,11 @@ barChartDataOne = { //COMPLETED VS. REMAINING
    	segmentShowStroke: false,
 			inGraphDataFontStyle: 'bold',
 			inGraphDataFontSize: '14',
+			roundPct: 0,
 			annotationFunction: ["mousemove", "touchstart", "touchmove","onAnimationComplete","mouseout"],
 			//pointDot: false,
 			showTooltips: true,
-			
+			inGraphDataRadiusPosition: [3,3],
 			//maxBarWidth: 80,
          //overlayBars: false,
          //datasetFill: false,
@@ -1999,7 +2000,7 @@ else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ 
 	<p id="filler5"><br></p>
 	
 
-	<p id="credits1" style="position: relative; z-index: 9; align: right;color: #333333; background-color: #dddddd; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 836px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 24th, 2017 (v 1.11).<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p>
+	<p id="credits1" style="position: relative; z-index: 9; align: right;color: #333333; background-color: #dddddd; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 836px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 25th, 2017 (v 1.12).<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p>
 
 
 	
@@ -2041,7 +2042,7 @@ else if( (((inputTaskString.charAt(0)).toLowerCase()).split('z')).length > 1 ){ 
 	<table width="830px">
 	<tr>
 	
-	<td><p style="width:100%;"><p id="credits2" style="position: absolute; text-align: center;color: #333333; background-color: #999999; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 820px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 24th, 2017 (v. 1.11).<br>Questions? Email joshua (at) joshua (dot) consulting or see <a href="README.txt">readme</a>.<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p><br><br></td>
+	<td><p style="width:100%;"><p id="credits2" style="position: absolute; text-align: center;color: #333333; background-color: #999999; border:2px solid #333333; border-radius:15px; font: 10px arial, sans-serif; width: 820px"><b>Author: <a href='http://www.joshua.consulting' target='_blank'>Joshua Exler</a>. <a href='LICENSE.txt'>License</a></b>: MIT. <b>Last Updated:</b> July 25th, 2017 (v. 1.12).<br>Questions? Email joshua (at) joshua (dot) consulting or see <a href="README.txt">readme</a>.<br>Uses <a href='https://github.com/OiYouYeahYou/Todoist.js' target='_blank'>todoist.js</a> by OiYouYeahYou and <a href='https://github.com/FVANCOP/ChartNew.js' target='_blank'>ChartNew.js</a> by FVANCOP. Icons from <a href='https://nounproject.com'>The Noun Project.</a></p><br><br></td>
 	
 	</tr>
 	</table>
