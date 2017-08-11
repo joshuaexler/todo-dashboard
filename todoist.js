@@ -209,9 +209,11 @@ function Todoist(){
       dataSupport.projects  [ item.projectId ]  [ key ] = true;
       dataSupport.projects  [ item.projectId ]  [ key ] = true;
       dataSupport.priorities  [ item.priority ] [ key ] = true;
+      try{
       for ( e = 0; e < item.labels.length; e++ )
       {dataSupport.labels [ item.labels[e] ]  [ item.id ] = true;}
-
+      }
+      catch(err){console.log('Reading labels of tasks');} //This try catch loop added by Joshua Exler 2017.08.11
       // Nativisation
       item.checked    =     Boolean ( item.checked    );
       item.dateAdded    = new   Date  ( item.dateAdded  );
